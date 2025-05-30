@@ -1,16 +1,22 @@
-import * as React from 'react'
-import { Text, TextInput, TouchableOpacity, View } from 'react-native'
-import { useSignUp } from '@clerk/clerk-expo'
-import { Link, useRouter } from 'expo-router'
+import { useState } from 'react';
+import { Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useSignUp } from '@clerk/clerk-expo';
+import { useRouter } from 'expo-router';
+import { styles } from "@/assets/styles/auth.styles.js";
+import { COLORS } from '../../constants/colors';
+import { Ionicons } from "@expo/vector-icons"; 
+import { Image } from "expo-image";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 export default function SignUpScreen() {
     const { isLoaded, signUp, setActive } = useSignUp()
     const router = useRouter()
 
-    const [emailAddress, setEmailAddress] = React.useState('')
-    const [password, setPassword] = React.useState('')
-    const [pendingVerification, setPendingVerification] = React.useState(false)
-    const [code, setCode] = React.useState('')
+    const [emailAddress, setEmailAddress] = useState('');
+    const [password, setPassword] = useState('');
+    const [pendingVerification, setPendingVerification] = useState(false);
+    const [code, setCode] = useState('');
+    const [error, setError] = useState()
 
     // Handle submission of sign-up form
     const onSignUpPress = async () => {
@@ -65,46 +71,77 @@ export default function SignUpScreen() {
 
     if (pendingVerification) {
         return (
-        <>
-            <Text>Verifica tu correo electrónico</Text>
+        <View style={styles.verificationContainer}>
+            <Text style={styles.verificationTitle}>Verifica tu correo electrónico</Text>
+
+            {error ? (
+                <View style={styles.errorBox}> 
+                    <Ionicons name="alert-circle" size={20} color={COLORS.expense} />
+                    <Text style={styles.errorText}>{error}</Text>
+                    <TouchableOpacity on Press={() => setError("")}>
+                        <Ionicons name="close" size={20} color={COLORS.textLight} />
+                    </TouchableOpacity>
+                </View>
+            ) : null}
+
             <TextInput
-            value={code}
-            placeholder="Ingresa tu código de verificación"
-            onChangeText={(code) => setCode(code)}
+                style={[styles.verificationInput, error && styles.errorInput]}
+                value={code}
+                placeholder="Ingresa código de verificación"
+                // placeholderTextColor="#9A8478"
+                onChangeText={(code) => setCode(code)}
             />
-            <TouchableOpacity onPress={onVerifyPress}>
-            <Text>Verificar</Text>
+
+            <TouchableOpacity onPress={onVerifyPress} style={styles.button}>
+            <Text style={styles.buttonText}>Verificar</Text>
             </TouchableOpacity>
-        </>
+        </View>
         )
     }
 
     return (
-        <View>
-        <>
-            <Text>Registrarse</Text>
-            <TextInput
-            autoCapitalize="none"
-            value={emailAddress}
-            placeholder="Correo"
-            onChangeText={(email) => setEmailAddress(email)}
-            />
-            <TextInput
-            value={password}
-            placeholder="Contraseña"
-            secureTextEntry={true}
-            onChangeText={(password) => setPassword(password)}
-            />
-            <TouchableOpacity onPress={onSignUpPress}>
-            <Text>Continuar</Text>
-            </TouchableOpacity>
-            <View style={{ display: 'flex', flexDirection: 'row', gap: 3 }}>
-            <Text>¿Ya tienes una cuenta?</Text>
-            <Link href="/sign-in">
-                <Text>Iniciar sesión</Text>
-            </Link>
+        <KeyboardAwareScrollView style={{ flex: 1 }} contentContainerStyle= {{ flexGrow: 1 }} enableOnAndroid={true} enableAutomaticScroll={true}>
+            <View style={ styles.container }>
+                <Image source={require("../../assets/images/revenue-i2.png")} style={styles.illustration} />
+
+                <Text style={styles.title}>Registrarse</Text>
+
+                {error ? (
+                    <View style={styles.errorBox}> 
+                        <Ionicons name="alert-circle" size={20} color={COLORS.expense} />
+                        <Text style={styles.errorText}>{error}</Text>
+                        <TouchableOpacity on Press={() => setError("")}>
+                            <Ionicons name="close" size={20} color={COLORS.textLight} />
+                        </TouchableOpacity>
+                    </View>
+                ) : null}
+
+                <TextInput
+                    style={[styles.input, error && styles.errorInput]}
+                    autoCapitalize="none"
+                    value={emailAddress}
+                    placeholder="Correo"
+                    onChangeText={(email) => setEmailAddress(email)}
+                />
+                <TextInput
+                    style={[styles.input, error && styles.errorInput]}
+                    value={password}
+                    placeholder="Contraseña"
+                    secureTextEntry={true}
+                    onChangeText={(password) => setPassword(password)}
+                />
+
+                <TouchableOpacity style={styles.button} onPress={onSignUpPress}>
+                <Text style={styles.buttonText}>Continuar</Text>
+                </TouchableOpacity>
+
+                <View style={styles.footerContainer}>
+                <Text style={styles.footerText}>¿Ya tienes una cuenta?{" "}</Text>
+                <TouchableOpacity onPress={() => router.back()}>
+                    <Text style={styles.linkText}>Inicia sesión</Text>
+                </TouchableOpacity>
+                </View>
             </View>
-        </>
-        </View>
+        </KeyboardAwareScrollView>
     )
 }

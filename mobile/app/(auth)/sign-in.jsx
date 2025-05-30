@@ -1,14 +1,19 @@
 import { useSignIn } from '@clerk/clerk-expo'
 import { Link, useRouter } from 'expo-router'
-import { Text, TextInput, TouchableOpacity, View } from 'react-native'
-import React from 'react'
+import { Text, TextInput, TouchableOpacity, View, Image } from 'react-native'
+import { useState } from 'react'
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { styles } from '../../assets/styles/auth.styles';
+import { Ionicons } from '@expo/vector-icons';
+import { COLORS } from '../../constants/colors';
 
 export default function Page() {
     const { signIn, setActive, isLoaded } = useSignIn()
     const router = useRouter()
 
-    const [emailAddress, setEmailAddress] = React.useState('')
-    const [password, setPassword] = React.useState('')
+    const [emailAddress, setEmailAddress] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState("");
 
     // Handle the submission of the sign-in form
     const onSignInPress = async () => {
@@ -32,35 +37,60 @@ export default function Page() {
             console.error(JSON.stringify(signInAttempt, null, 2))
         }
         } catch (err) {
-        // See https://clerk.com/docs/custom-flows/error-handling
-        // for more info on error handling
-        console.error(JSON.stringify(err, null, 2))
+            if (err.errors?.[0]?.code === "form_password_incorrect") {
+                setError("Contraseña incorrecta. Por favor, inténtalo de nuevo.");
+            } else {
+                setError("Error al iniciar sesión, por favor, inténtelo de nuevo.")
+            }
         }
     }
 
     return (
-        <View>
-        <Text>Iniciar sesión</Text>
-        <TextInput
-            autoCapitalize="none"
-            value={emailAddress}
-            placeholder="Correo"
-            onChangeText={(emailAddress) => setEmailAddress(emailAddress)}
-        />
-        <TextInput
-            value={password}
-            placeholder="Contraseña"
-            secureTextEntry={true}
-            onChangeText={(password) => setPassword(password)}
-        />
-        <TouchableOpacity onPress={onSignInPress}>
-            <Text>Continuar</Text>
-        </TouchableOpacity>
-        <View style={{ display: 'flex', flexDirection: 'row', gap: 3 }}>
-            <Link href="/sign-up">
-            <Text>Registrarse</Text>
-            </Link>
-        </View>
-        </View>
+        <KeyboardAwareScrollView style={{ flex: 1 }} contentContainerStyle= {{ flexGrow: 1 }} enableOnAndroid={true} enableAutomaticScroll={true} extraScrollHeight={30}>
+            <View style={styles.container}>
+                <Image source={require("../../assets/images/revenue-i1.png")} style={styles.illustration} />
+
+                <Text style={styles.title}>Iniciar sesión</Text>
+
+                {error ? (
+                <View style={styles.errorBox}> 
+                    <Ionicons name="alert-circle" size={20} color={COLORS.expense} />
+                    <Text style={styles.errorText}>{error}</Text>
+                    <TouchableOpacity on Press={() => setError("")}>
+                        <Ionicons name="close" size={20} color={COLORS.textLight} />
+                    </TouchableOpacity>
+                </View>
+                ) : null}
+
+                <TextInput
+                    style={[styles.input, error && styles.errorInput]}
+                    autoCapitalize="none"
+                    value={emailAddress}
+                    placeholder="Correo"
+                    onChangeText={(emailAddress) => setEmailAddress(emailAddress)}
+                />
+
+                <TextInput
+                    style={[styles.input, error && styles.errorInput]}
+                    value={password}
+                    placeholder="Contraseña"
+                    secureTextEntry={true}
+                    onChangeText={(password) => setPassword(password)}
+                />
+
+                <TouchableOpacity style={styles.button} onPress={onSignInPress}>
+                    <Text style={styles.buttonText}>Continuar</Text>
+                </TouchableOpacity>
+
+                <View style={styles.footerContainer}>
+                    <Text style={styles.footerText}>¿No tienes una cuenta?{" "}</Text>
+                    <Link href="/sign-up" asChild>
+                        <TouchableOpacity>
+                            <Text style={styles.linkText}>Registrate</Text>
+                        </TouchableOpacity>
+                    </Link>
+                </View>
+            </View>
+        </KeyboardAwareScrollView>
     )
 }

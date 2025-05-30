@@ -10,13 +10,13 @@ export const styles = StyleSheet.create({
         justifyContent: "center",
     },
     illustration: {
-        width: "100%",
         height: 310,
+        width: 300,
         resizeMode: "contain",
     },
     title: {
         fontSize: 32,
-        fontWeight: "bold",
+        fontWeight: "900",
         color: COLORS.text,
         marginVertical: 15,
         textAlign: "center",
@@ -71,7 +71,7 @@ export const styles = StyleSheet.create({
     },
     verificationTitle: {
         fontSize: 24,
-        fontWeight: "bold",
+        fontWeight: "900",
         color: COLORS.text,
         marginBottom: 20,
         textAlign: "center",
